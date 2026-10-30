@@ -1,0 +1,44 @@
+<h2>Diffie-Hellman</h2>
+<label>p: <input id="p" value="23"></label>
+<label>g: <input id="g" value="5"></label>
+<label>a: <input id="a" value="6"></label>
+<label>b: <input id="b" value="15"></label>
+<button onclick="go()">Go</button>
+<p id="r"></p>
+
+<script>
+  const v = i => +document.getElementById(i).value;
+
+  function pow(m, e, n) {
+    let r = 1;
+    m %= n;
+    for (; e > 0; e = Math.floor(e / 2), m = m * m % n)
+      if (e % 2) r = r * m % n;
+    return r;
+  }
+
+  function isPrime(n) {
+    if (n < 2) return false;
+    for (let i = 2; i * i <= n; i++) if (n % i == 0) return false;
+    return true;
+  }
+
+  function isRoot(g, p) {
+    if (g <= 1 || g >= p) return false;
+    for (let f = 2; f < p; f++)
+      if ((p - 1) % f == 0 && isPrime(f) && pow(g, (p - 1) / f, p) == 1) return false;
+    return true;
+  }
+
+  function go() {
+    let p = v('p'), g = v('g'), a = v('a'), b = v('b'), o = document.getElementById('r');
+    if (!isPrime(p))
+      return o.innerHTML = `<b style="color:red">Error: p=${p} is NOT prime. Enter a prime number.</b>`;
+    if (!isRoot(g, p))
+      return o.innerHTML = `<b style="color:red">Error: ${g} is NOT a primitive root of ${p}</b>`;
+    let A = pow(g, a, p), B = pow(g, b, p), s1 = pow(B, a, p), s2 = pow(A, b, p);
+    o.innerHTML = `g=${g} is valid primitive root of p=${p} ✅ <br>
+      A=${A} B=${B}<br>
+      Secret=${s1} ${s1 == s2 ? 'Matched' : 'Failed'}`;
+  }
+</script>
